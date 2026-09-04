@@ -1,0 +1,38 @@
+<!-- Keep the exact same <head> and <style> structures from Page 1 -->
+<body>
+    <div class="box">
+        <div class="card">
+            <div class="icon">🖥️</div>
+            <div class="title">Requested_File_Package.zip</div>
+            <div class="meta">Location: Optimized Node</div>
+            <div class="status" id="status">Allocating high-speed server bandwidth...</div>
+            <div class="track"><div class="fill" id="fill"></div></div>
+            <a href="#" class="btn" id="btn" onclick="nextPage(event)">Allocating Node (<span id="sec">4</span>s)</a>
+        </div>
+    </div>
+    <script>
+        const link = "YOUR_MONETAG_DIRECT_LINK_HERE";
+        let time = 4; // Shorter timer to keep user moving fast
+        const interval = setInterval(() => {
+            time--;
+            document.getElementById('sec').innerText = time;
+            document.getElementById('fill').style.width = ((4 - time) / 4 * 100) + '%';
+            if (time <= 0) {
+                clearInterval(interval);
+                document.getElementById('status').innerText = "Bandwidth Successfully Allocated!";
+                const btn = document.getElementById('btn');
+                btn.innerText = "Confirm Integrity Check";
+                btn.classList.add('ready');
+            }
+        }, 1000);
+        function nextPage(e) {
+            e.preventDefault();
+            if (time <= 0) {
+                window.open(link, '_blank');
+                window.location.href = "step3.html";
+            }
+        }
+    </script>
+</body>
+</html>
+
