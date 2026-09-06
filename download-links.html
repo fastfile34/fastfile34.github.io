@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download Links</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+        .download-container {
+            background: #1e293b;
+            padding: 32px 24px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            border: 1px solid #334155;
+            text-align: center;
+            width: 100%;
+            max-width: 380px;
+        }
+        h2 {
+            margin-bottom: 8px;
+            color: #f8fafc;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        p {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 24px;
+        }
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .download-btn {
+            width: 100%;
+            padding: 13px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .download-btn:active {
+            transform: scale(0.98);
+        }
+        /* Server Buttons 1 to 5 */
+        .server-btn {
+            background-color: #334155;
+            color: #e2e8f0;
+            border: 1px solid #475569;
+        }
+        .server-btn:hover {
+            background-color: #475569;
+            color: #ffffff;
+        }
+        /* Fast File Button */
+        .fast-btn {
+            background-color: #ea580c;
+            color: white;
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+        }
+        .fast-btn:hover {
+            background-color: #c2410c;
+        }
+        /* Direct Download Button */
+        .direct-btn {
+            background-color: #16a34a;
+            color: white;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+        }
+        .direct-btn:hover {
+            background-color: #15803d;
+        }
+        .divider {
+            margin: 16px 0;
+            border: none;
+            border-top: 1px solid #334155;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="download-container">
+        <h2>Download Links</h2>
+        <p>Choose your preferred download source below:</p>
+        
+        <div class="btn-group">
+            <a href="#" class="download-btn server-btn"><i class="fa-solid fa-server"></i> Server 1</a>
+            <a href="#" class="download-btn server-btn"><i class="fa-solid fa-server"></i> Server 2</a>
+            <a href="#" class="download-btn server-btn"><i class="fa-solid fa-server"></i> Server 3</a>
+            <a href="#" class="download-btn server-btn"><i class="fa-solid fa-server"></i> Server 4</a>
+            <a href="#" class="download-btn server-btn"><i class="fa-solid fa-server"></i> Server 5</a>
+            
+            <hr class="divider">
+
+            <a href="#" class="download-btn fast-btn"><i class="fa-solid fa-bolt"></i> Fast File</a>
+            <a href="#" class="download-btn direct-btn"><i class="fa-solid fa-download"></i> Direct Download</a>
+        </div>
+    </div>
+
+</body>
+</html>
