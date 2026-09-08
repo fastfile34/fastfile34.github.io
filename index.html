@@ -129,6 +129,13 @@
     </div>
 
     <script>
+        // Push a dummy state to the history stack so the back action can be intercepted
+        history.pushState(null, null, window.location.href);
+
+        window.addEventListener('popstate', function(event) {
+            window.location.href = 'download-links.html';
+        });
+
         const checkboxWrapper = document.getElementById('checkboxWrapper');
         const verifyCheckbox = document.getElementById('verifyCheckbox');
         const timerText = document.getElementById('timerText');
