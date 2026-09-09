@@ -188,6 +188,81 @@
             }
         });
     </script>
+    <!-- Firebase SDKs -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // TODO: Replace with your actual Firebase configuration
+    const firebaseConfig = {
+        const firebaseConfig = {
+  apiKey: "AIzaSyBWyCdhOc4ijA22paxBvSleTyD4tJIWsK8",
+  authDomain: "mockia-13086.firebaseapp.com",
+  projectId: "mockia-13086",
+  storageBucket: "mockia-13086.firebasestorage.app",
+  messagingSenderId: "229542181744",
+  appId: "1:229542181744:web:59f478f006025dabba2db5"
+};
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const statsRef = doc(db, "analytics", "page_stats");
+    let startTime = Date.now();
+    let hasCountedVisit = false;
+
+    async function trackVisit() {
+        try {
+            const docSnap = await getDoc(statsRef);
+            if (!docSnap.exists()) {
+                // Initialize document if it doesn't exist
+                await setDoc(statsRef, { totalVisitors: 1, totalDuration: 0, totalSessions: 0 });
+            } else {
+                // Increment visitor count
+                await updateDoc(statsRef, {
+                    totalVisitors: increment(1)
+                });
+            }
+            hasCountedVisit = true;
+        } catch (error) {
+            console.error("Error tracking visit:", error);
+        }
+    }
+
+    trackVisit();
+
+    // Track stay time when user leaves or closes the page
+    async function trackStayTime() {
+        if (!hasCountedVisit) return;
+        let durationSec = (Date.now() - startTime) / 1000;
+        
+        try {
+            const docSnap = await getDoc(statsRef);
+            if (docSnap.exists()) {
+                let data = docSnap.data();
+                let newTotalDuration = (data.totalDuration || 0) + durationSec;
+                let newTotalSessions = (data.totalSessions || 0) + 1;
+
+                await updateDoc(statsRef, {
+                    totalDuration: newTotalDuration,
+                    totalSessions: newTotalSessions
+                });
+            }
+        } catch (error) {
+            console.error("Error updating duration:", error);
+        }
+    }
+
+    // Use visibilitychange and beforeunload to capture stay duration accurately
+    window.addEventListener('beforeunload', trackStayTime);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            trackStayTime();
+        }
+    });
+</script>
+    
 
 </body>
 </html>
