@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Analytics Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .dashboard-container {
+            background: #1e293b;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 1px solid #334155;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 24px;
+            font-size: 22px;
+            color: #f8fafc;
+        }
+        .stat-card {
+            background: #334155;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #475569;
+        }
+        .stat-card i {
+            font-size: 24px;
+            color: #60a5fa;
+            margin-bottom: 8px;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-top: 4px;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <h2><i class="fa-solid fa-chart-line"></i> Visitor Analytics</h2>
+        
+        <div class="stat-card">
+            <i class="fa-solid fa-users"></i>
+            <div class="stat-label">Total Visitors</div>
+            <div class="stat-value" id="totalVisitors">Loading...</div>
+        </div>
+
+        <div class="stat-card">
+            <i class="fa-solid fa-clock"></i>
+            <div class="stat-label">Average Stay Time</div>
+            <div class="stat-value" id="avgStayTime">Loading...</div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK & Stats Fetcher -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // TODO: Use the exact same Firebase configuration as your verification page
+        const firebaseConfig = {
+            const firebaseConfig = {
+  apiKey: "AIzaSyBWyCdhOc4ijA22paxBvSleTyD4tJIWsK8",
+  authDomain: "mockia-13086.firebaseapp.com",
+  projectId: "mockia-13086",
+  storageBucket: "mockia-13086.firebasestorage.app",
+  messagingSenderId: "229542181744",
+  appId: "1:229542181744:web:59f478f006025dabba2db5"
+};
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadStats() {
+            try {
+                const docRef = doc(db, "analytics", "page_stats");
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('totalVisitors').textContent = data.totalVisitors || 0;
+
+                    let avgSeconds = 0;
+                    if (data.totalSessions && data.totalSessions > 0) {
+                        avgSeconds = Math.round(data.totalDuration / data.totalSessions);
+                    }
+                    
+                    // Format time cleanly (e.g., "12s" or "1m 15s")
+                    if (avgSeconds < 60) {
+                        document.getElementById('avgStayTime').textContent = `${avgSeconds}s`;
+                    } else {
+                        let mins = Math.floor(avgSeconds / 60);
+                        let secs = avgSeconds % 60;
+                        document.getElementById('avgStayTime').textContent = `${mins}m ${secs}s`;
+                    }
+                } else {
+                    document.getElementById('totalVisitors').textContent = '0';
+                    document.getElementById('avgStayTime').textContent = '0s';
+                }
+            } catch (error) {
+                console.error("Error loading stats:", error);
+                document.getElementById('totalVisitors').textContent = 'Error';
+                document.getElementById('avgStayTime').textContent = 'Error';
+            }
+        }
+
+        loadStats();
+        // Refresh stats every 10 seconds
+        setInterval(loadStats, 10000);
+    </script>
+
+</body>
+</html>
