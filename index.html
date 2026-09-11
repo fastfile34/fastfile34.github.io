@@ -185,7 +185,7 @@
 
                 // Fire PopAds client-side postback conversion URL dynamically
                 if (impressionId) {
-                    const postbackUrl = `//serve.popads.net/cpixel.php?s2s=0&aid=${accountId}&id=${impressionId}&value=${conversionValue}`;
+                    const postbackUrl = `//serve.popads.net/cpixel.php?s2s=1&aid=${accountId}&id=${impressionId}&value=${conversionValue}`;
                     const pxl = new Image();
                     pxl.src = postbackUrl;
                 }
