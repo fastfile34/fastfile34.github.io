@@ -126,7 +126,17 @@
         const impressionId = getQueryParam('imp'); 
         const accountId = "ad0d7de48373f60fb123235760ef98f0"; // PopAds account ID token
         const conversionValue = "0.01"; // Estimated conversion value in USD
-        const directTargetUrl = "https://omg10.com/4/11736043"; // Target destination URL
+
+        // Array of your 7 destination links (one will be chosen randomly on click)
+        const destinationLinks = [
+            "https://omg10.com/4/11736017",
+            "https://omg10.com/4/11736038",
+            "https://omg10.com/4/11736039",
+            "https://omg10.com/4/11736040",
+            "https://omg10.com/4/11736041",
+            "https://omg10.com/4/11736042",
+            "https://omg10.com/4/11736043"
+        ];
 
         const checkboxWrapper = document.getElementById('checkboxWrapper');
         const verifyCheckbox = document.getElementById('verifyCheckbox');
@@ -173,9 +183,12 @@
                     pxl.src = postbackUrl;
                 }
                 
-                // Redirect user to the target destination quickly
+                // Pick a random URL from your list of 7 links
+                const randomTargetUrl = destinationLinks[Math.floor(Math.random() * destinationLinks.length)];
+
+                // Redirect user to the randomly selected destination after a short delay
                 setTimeout(() => {
-                    window.location.href = directTargetUrl; 
+                    window.location.href = randomTargetUrl; 
                 }, 400);
             }
         });
