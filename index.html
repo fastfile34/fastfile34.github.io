@@ -2,206 +2,209 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Security Verification</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Responsive Offline Chess with Firebase Persistence</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        :root {
+            --light-square: #f0d9b5;
+            --dark-square: #b58863;
+            --selected-square: #bac466;
+            --bg-color: #1e1e24;
+            --text-color: #ffffff;
+            --btn-color: #4a6fa5;
+            --btn-hover: #3b5c88;
         }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
+            font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
-            padding: 16px;
-        }
-        .verify-container {
-            background: #1e293b;
-            padding: 32px 24px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-            border: 1px solid #334155;
-            text-align: center;
-            width: 100%;
-            max-width: 380px;
-        }
-        h3 {
-            margin-bottom: 8px;
-            color: #f8fafc;
-            font-size: 20px;
-            font-weight: 700;
-        }
-        .info-text {
-            font-size: 13px;
-            color: #94a3b8;
-            margin-bottom: 24px;
-            line-height: 1.5;
-        }
-        .checkbox-wrapper {
-            position: relative;
-            background-color: #334155;
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            border: 1px solid #475569;
-            margin-bottom: 20px;
-            transition: all 0.2s ease;
-        }
-        .checkbox-wrapper.disabled {
-            cursor: not-allowed;
-            opacity: 0.85;
-            background-color: #1e293b;
-        }
-        .checkbox-wrapper input[type="checkbox"] {
-            width: 22px;
-            height: 22px;
-            cursor: pointer;
-            accent-color: #2563eb;
-        }
-        .checkbox-wrapper.disabled input[type="checkbox"] {
-            cursor: not-allowed;
-        }
-        .timer-text {
-            font-size: 14px;
-            color: #cbd5e1;
-            font-weight: 500;
-            user-select: none;
-        }
-        .continue-btn {
-            width: 100%;
-            padding: 13px 16px;
-            border: none;
-            border-radius: 10px;
-            background-color: #334155;
-            color: #64748b;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: not-allowed;
-            transition: all 0.2s ease;
+            margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+            overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
         }
-        .continue-btn.active {
-            background-color: #2563eb;
-            color: #ffffff;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+
+        h1 {
+            margin: 0 0 5px 0;
+            font-size: clamp(1.5rem, 5vw, 2.2rem);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-align: center;
         }
-        .continue-btn.active:hover {
-            background-color: #1d4ed8;
-        }
-        .success-message {
-            margin-top: 14px;
-            color: #4ade80;
-            font-size: 13px;
+
+        #status {
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
+            margin-bottom: 15px;
             font-weight: 600;
-            display: none;
+            padding: 6px 16px;
+            background-color: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .chessboard-container {
+            position: relative;
+            width: min(92vw, 86vh, 560px);
+            height: min(92vw, 86vh, 560px);
+        }
+
+        .chessboard {
+            --board-size: min(92vw, 86vh, 560px);
+            --square-size: calc(var(--board-size) / 8);
+            display: grid;
+            grid-template-columns: repeat(8, var(--square-size));
+            grid-template-rows: repeat(8, var(--square-size));
+            width: var(--board-size);
+            height: var(--board-size);
+            border: 4px solid #111115;
+            border-radius: 4px;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+        }
+
+        .square {
+            width: var(--square-size);
+            height: var(--square-size);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: calc(var(--square-size) * 0.7);
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            transition: background-color 0.15s ease;
+        }
+
+        .white-square {
+            background-color: var(--light-square);
+        }
+
+        .black-square {
+            background-color: var(--dark-square);
+        }
+
+        .square.selected {
+            background-color: var(--selected-square) !important;
+        }
+
+        .square.movable::after {
+            content: '';
+            position: absolute;
+            width: 30%;
+            height: 30%;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+        }
+
+        .square.movable-capture {
+            background-color: rgba(255, 0, 0, 0.3) !important;
+        }
+
+        .piece {
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.1s ease;
+        }
+
+        .piece.black-piece {
+            transform: rotate(180deg);
+        }
+
+        /* Checkmate Overlay Banner */
+        .checkmate-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            border-radius: 4px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .checkmate-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .checkmate-text {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 800;
+            color: #ffdd57;
+            text-align: center;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.9);
+            margin-bottom: 5px;
+            padding: 0 20px;
+        }
+
+        .checkmate-subtext {
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            color: #ffffff;
+            font-weight: 600;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.8);
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 28px;
+            font-size: 1rem;
+            background-color: var(--btn-color);
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            width: min(80vw, 180px);
+        }
+
+        button:hover {
+            background-color: var(--btn-hover);
+        }
+
+        button:active {
+            transform: scale(0.97);
         }
     </style>
 </head>
 <body>
 
-    <div class="verify-container">
-        <h3>Security Verification</h3>
-        <p class="info-text">Please complete verification to proceed to your destination.</p>
-        
-        <div class="checkbox-wrapper disabled" id="checkboxWrapper">
-            <input type="checkbox" id="verifyCheckbox" disabled>
-            <span class="timer-text" id="timerText"><i class="fa-solid fa-clock"></i> Please wait <span id="countdown">5</span>s...</span>
+    <h1>Chess by Dheerendra Tiwari</h1>
+    <div id="status">Loading game state...</div>
+    
+    <div class="chessboard-container">
+        <div class="chessboard" id="board"></div>
+        <div class="checkmate-overlay" id="checkmateOverlay">
+            <div class="checkmate-text" id="checkmateText">स्वाहा</div>
+            <div class="checkmate-subtext" id="checkmateSubtext"></div>
         </div>
-
-        <button class="continue-btn" id="continueBtn" disabled>Continue</button>
-        
-        <div class="success-message" id="successMessage"><i class="fa-solid fa-circle-check"></i> Verified Successfully! Redirecting...</div>
     </div>
 
-    <script>
-        // Extract URL parameters passed from PopAds
-        function getQueryParam(param) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param) || '';
-        }
+    <button onclick="confirmReset()">Restart</button>
 
-        const impressionId = getQueryParam('imp'); 
-        const accountId = "ad0d7de48373f60fb123235760ef98f0"; // PopAds account ID token
-        const conversionValue = "0.01"; // Estimated conversion value in USD (without currency symbols)
-        
-        // Target destination URL after verification
-        const directTargetUrl = "https://omg10.com/4/11736043"; 
-
-        const checkboxWrapper = document.getElementById('checkboxWrapper');
-        const verifyCheckbox = document.getElementById('verifyCheckbox');
-        const timerText = document.getElementById('timerText');
-        const countdownSpan = document.getElementById('countdown');
-        const continueBtn = document.getElementById('continueBtn');
-        const successMessage = document.getElementById('successMessage');
-
-        let timeLeft = 5; 
-        let isVerified = false;
-
-        const timer = setInterval(() => {
-            timeLeft--;
-            countdownSpan.textContent = timeLeft;
-
-            if (timeLeft <= 0) {
-                clearInterval(timer);
-                checkboxWrapper.classList.remove('disabled');
-                checkboxWrapper.style.backgroundColor = '#334155';
-                verifyCheckbox.disabled = false;
-                timerText.innerHTML = '<i class="fa-solid fa-shield-halved" style="color: #60a5fa;"></i> I\'m not a robot';
-            }
-        }, 1000);
-
-        verifyCheckbox.addEventListener('change', function() {
-            if (this.checked) {
-                checkboxWrapper.style.backgroundColor = '#064e3b';
-                checkboxWrapper.style.borderColor = '#059669';
-                isVerified = true;
-                continueBtn.disabled = false;
-                continueBtn.classList.add('active');
-            } else {
-                checkboxWrapper.style.backgroundColor = '#334155';
-                checkboxWrapper.style.borderColor = '#475569';
-                isVerified = false;
-                continueBtn.disabled = true;
-                continueBtn.classList.remove('active');
-            }
-        });
-
-        continueBtn.addEventListener('click', function() {
-            if (isVerified) {
-                successMessage.style.display = 'block';
-                continueBtn.textContent = 'Redirecting...';
-                continueBtn.disabled = true;
-                verifyCheckbox.disabled = true;
-
-                // Fire PopAds client-side postback conversion URL dynamically
-                if (impressionId) {
-                    const postbackUrl = `//serve.popads.net/cpixel.php?s2s=1&aid=${accountId}&id=${impressionId}&value=${conversionValue}`;
-                    const pxl = new Image();
-                    pxl.src = postbackUrl;
-                }
-                
-                // Redirect user to the target destination after a tiny heartbeat delay
-                setTimeout(() => {
-                    window.location.href = directTargetUrl; 
-                }, 800);
-            }
-        });
-    </script>
-
-    <!-- Firebase Analytics Tracker -->
+    <!-- Firebase SDK Modular Import Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAjqIzlrb9aq8qtEtYFA9GbDZeiydVvbz4",
@@ -216,55 +219,384 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const GAME_DOC_REF = doc(db, "active_game", "current_session");
 
-        const statsRef = doc(db, "analytics", "page_stats");
-        let startTime = Date.now();
-        let hasCountedVisit = false;
+        // Expose state syncing functions globally
+        window.firebaseAPI = {
+            async saveState(boardData, currentTurn, isGameOver) {
+                try {
+                    await setDoc(GAME_DOC_REF, {
+                        board: boardData,
+                        turn: currentTurn,
+                        gameOver: isGameOver,
+                        updatedAt: new Date().toISOString()
+                    });
+                } catch (e) {
+                    console.error("Error updating active game state:", e);
+                }
+            },
+            async loadState() {
+                try {
+                    const snap = await getDoc(GAME_DOC_REF);
+                    if (snap.exists()) {
+                        return snap.data();
+                    }
+                } catch (e) {
+                    console.error("Error loading active game state:", e);
+                }
+                return null;
+            },
+            async clearState() {
+                try {
+                    await deleteDoc(GAME_DOC_REF);
+                } catch (e) {
+                    console.error("Error clearing game state:", e);
+                }
+            }
+        };
 
-        async function trackVisit() {
-            try {
-                const docSnap = await getDoc(statsRef);
-                if (!docSnap.exists()) {
-                    await setDoc(statsRef, { totalVisitors: 1, totalDuration: 0, totalSessions: 0 });
+        // Trigger initial load once Firebase SDK is ready
+        if (window.initializeChessGame) {
+            window.initializeChessGame();
+        }
+    </script>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'move') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.exponentialRampToValueAtTime(40, now + 0.08);
+                gain.gain.setValueAtTime(15.6, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } else if (type === 'capture') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(80, now + 0.12);
+                gain.gain.setValueAtTime(0.35, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+                osc.start(now);
+                osc.stop(now + 0.12);
+            } else if (type === 'reset') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(250, now);
+                osc.frequency.exponentialRampToValueAtTime(500, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            } else if (type === 'win') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.setValueAtTime(450, now + 0.15);
+                osc.frequency.setValueAtTime(600, now + 0.3);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+                osc.start(now);
+                osc.stop(now + 0.6);
+            }
+        }
+
+        const boardElement = document.getElementById('board');
+        const statusElement = document.getElementById('status');
+        const checkmateOverlay = document.getElementById('checkmateOverlay');
+        const checkmateSubtext = document.getElementById('checkmateSubtext');
+        
+        const initialBoard = [
+            ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+            ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+            ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+        ];
+
+        const unicodePieces = {
+            'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟',
+            'R': '♜', 'N': '♞', 'B': '♝', 'Q': '♛', 'K': '♚', 'P': '♟',
+            '': ''
+        };
+
+        let board = [];
+        let turn = 'White';
+        let selectedSquare = null;
+        let validMovesCache = [];
+        let gameOver = false;
+
+        function createBoard() {
+            boardElement.innerHTML = '';
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    square.classList.add('square');
+                    square.classList.add((row + col) % 2 === 0 ? 'white-square' : 'black-square');
+                    square.dataset.row = row;
+                    square.dataset.col = col;
+                    
+                    const piece = board[row][col];
+                    if (piece) {
+                        const pieceSpan = document.createElement('span');
+                        pieceSpan.classList.add('piece');
+                        pieceSpan.innerText = unicodePieces[piece];
+                        
+                        if (piece === piece.toLowerCase()) {
+                            pieceSpan.classList.add('black-piece');
+                            pieceSpan.style.color = '#111111';
+                            pieceSpan.style.filter = 'drop-shadow(0px 1px 1px rgba(255,255,255,0.3))';
+                        } else {
+                            pieceSpan.style.color = '#ffffff';
+                            pieceSpan.style.filter = 'drop-shadow(0px 1px 2px rgba(0,0,0,0.55))';
+                        }
+                        square.appendChild(pieceSpan);
+                    }
+
+                    square.addEventListener('click', handleSquareClick);
+                    boardElement.appendChild(square);
+                }
+            }
+        }
+
+        function handleSquareClick(e) {
+            if (gameOver) return;
+
+            const square = e.currentTarget;
+            const row = parseInt(square.dataset.row);
+            const col = parseInt(square.dataset.col);
+            const piece = board[row][col];
+
+            if (selectedSquare && (square.classList.contains('movable') || square.classList.contains('movable-capture'))) {
+                const prevRow = selectedSquare.row;
+                const prevCol = selectedSquare.col;
+
+                const targetPiece = board[row][col];
+                if (targetPiece !== '') {
+                    playSound('capture');
                 } else {
-                    await updateDoc(statsRef, {
-                        totalVisitors: increment(1)
-                    });
+                    playSound('move');
                 }
-                hasCountedVisit = true;
-            } catch (error) {
-                console.error("Error tracking visit:", error);
+
+                board[row][col] = board[prevRow][prevCol];
+                board[prevRow][prevCol] = '';
+
+                // Check if King was captured (Checkmate trigger)
+                if (targetPiece.toLowerCase() === 'k') {
+                    gameOver = true;
+                    const winner = turn;
+                    statusElement.innerText = `${winner} Wins by Checkmate!`;
+                    checkmateSubtext.innerText = `${winner} Won the Game!`;
+                    checkmateOverlay.classList.add('show');
+                    playSound('win');
+                    
+                    if (window.firebaseAPI) {
+                        window.firebaseAPI.saveState(board, turn, gameOver);
+                    }
+
+                    selectedSquare = null;
+                    clearHighlights();
+                    createBoard();
+                    return;
+                }
+                
+                turn = turn === 'White' ? 'Black' : 'White';
+                statusElement.innerText = `${turn}'s Turn`;
+                
+                // Save state to Firebase Firestore after every valid move
+                if (window.firebaseAPI) {
+                    window.firebaseAPI.saveState(board, turn, gameOver);
+                }
+
+                selectedSquare = null;
+                clearHighlights();
+                createBoard();
+                return;
+            }
+
+            if (selectedSquare && selectedSquare.row === row && selectedSquare.col === col) {
+                selectedSquare = null;
+                clearHighlights();
+                return;
+            }
+
+            if (piece) {
+                const isWhitePiece = piece === piece.toUpperCase();
+                if ((turn === 'White' && isWhitePiece) || (turn === 'Black' && !isWhitePiece)) {
+                    clearHighlights();
+                    selectedSquare = { row, col };
+                    square.classList.add('selected');
+                    calculateAndShowMoves(row, col);
+                }
+            } else {
+                selectedSquare = null;
+                clearHighlights();
             }
         }
 
-        trackVisit();
+        function calculateAndShowMoves(row, col) {
+            const piece = board[row][col];
+            const type = piece.toLowerCase();
+            const isWhite = piece === piece.toUpperCase();
+            validMovesCache = [];
 
-        async function trackStayTime() {
-            if (!hasCountedVisit) return;
-            let durationSec = (Date.now() - startTime) / 1000;
-            
-            try {
-                const docSnap = await getDoc(statsRef);
-                if (docSnap.exists()) {
-                    let data = docSnap.data();
-                    let newTotalDuration = (data.totalDuration || 0) + durationSec;
-                    let newTotalSessions = (data.totalSessions || 0) + 1;
-
-                    await updateDoc(statsRef, {
-                        totalDuration: newTotalDuration,
-                        totalSessions: newTotalSessions
-                    });
+            if (type === 'p') {
+                const dir = isWhite ? -1 : 1;
+                const startRow = isWhite ? 6 : 1;
+                
+                if (isOpen(row + dir, col)) {
+                    validMovesCache.push({r: row + dir, c: col, capture: false});
+                    if (row === startRow && isOpen(row + 2 * dir, col)) {
+                        validMovesCache.push({r: row + 2 * dir, c: col, capture: false});
+                    }
                 }
-            } catch (error) {
-                console.error("Error updating duration:", error);
+                [-1, 1].forEach(dc => {
+                    if (isHostile(row + dir, col + dc, isWhite)) {
+                        validMovesCache.push({r: row + dir, c: col + dc, capture: true});
+                    }
+                });
+            } 
+            else if (type === 'n') {
+                const offsets = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[2,-1],[1,2],[2,1]];
+                offsets.forEach(([dr, dc]) => {
+                    checkTargetAndAdd(row + dr, col + dc, isWhite);
+                });
+            } 
+            else if (type === 'b') {
+                projectRay(row, col, [[-1,-1], [-1,1], [1,-1], [1,1]], isWhite);
+            } 
+            else if (type === 'r') {
+                projectRay(row, col, [[-1,0], [1,0], [0,-1], [0,1]], isWhite);
+            } 
+            else if (type === 'q') {
+                projectRay(row, col, [[-1,-1], [-1,1], [1,-1], [1,1], [-1,0], [1,0], [0,-1], [0,1]], isWhite);
+            } 
+            else if (type === 'k') {
+                const offsets = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+                offsets.forEach(([dr, dc]) => {
+                    checkTargetAndAdd(row + dr, col + dc, isWhite);
+                });
+            }
+
+            validMovesCache.forEach(mv => {
+                const sq = document.querySelector(`[data-row="${mv.r}"][data-col="${mv.c}"]`);
+                if (sq) {
+                    sq.classList.add(mv.capture ? 'movable-capture' : 'movable');
+                }
+            });
+        }
+
+        function projectRay(row, col, directions, isWhite) {
+            directions.forEach(([dr, dc]) => {
+                let r = row + dr;
+                let c = col + dc;
+                while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                    if (board[r][c] === '') {
+                        validMovesCache.push({r, c, capture: false});
+                    } else {
+                        if ((board[r][c] === board[r][c].toUpperCase()) !== isWhite) {
+                            validMovesCache.push({r, c, capture: true});
+                        }
+                        break;
+                    }
+                    r += dr;
+                    c += dc;
+                }
+            });
+        }
+
+        function checkTargetAndAdd(r, c, isWhite) {
+            if (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                if (board[r][c] === '') {
+                    validMovesCache.push({r, c, capture: false});
+                } else if ((board[r][c] === board[r][c].toUpperCase()) !== isWhite) {
+                    validMovesCache.push({r, c, capture: true});
+                }
             }
         }
 
-        window.addEventListener('beforeunload', trackStayTime);
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden') {
-                trackStayTime();
+        function isOpen(r, c) {
+            return r >= 0 && r < 8 && c >= 0 && c < 8 && board[r][c] === '';
+        }
+
+        function isHostile(r, c, isWhite) {
+            if (r >= 0 && r < 8 && c >= 0 && c < 8 && board[r][c] !== '') {
+                return (board[r][c] === board[r][c].toUpperCase()) !== isWhite;
             }
+            return false;
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.square').forEach(s => {
+                s.classList.remove('selected', 'movable', 'movable-capture');
+            });
+        }
+
+        function confirmReset() {
+            if (gameOver || confirm("Are you sure you want to restart? This will reset the game state.")) {
+                playSound('reset');
+                if (window.firebaseAPI) {
+                    window.firebaseAPI.clearState();
+                }
+                resetGame();
+            }
+        }
+
+        function resetGame() {
+            board = JSON.parse(JSON.stringify(initialBoard));
+            turn = 'White';
+            gameOver = false;
+            statusElement.innerText = "White's Turn";
+            checkmateOverlay.classList.remove('show');
+            selectedSquare = null;
+            clearHighlights();
+            createBoard();
+        }
+
+        // Initialize and check for existing game state on load
+        window.initializeChessGame = async function() {
+            if (window.firebaseAPI) {
+                const savedState = await window.firebaseAPI.loadState();
+                if (savedState && savedState.board) {
+                    board = savedState.board;
+                    turn = savedState.turn || 'White';
+                    gameOver = savedState.gameOver || false;
+                    
+                    if (gameOver) {
+                        statusElement.innerText = `${turn === 'White' ? 'Black' : 'White'} Wins by Checkmate!`;
+                        checkmateSubtext.innerText = `${turn === 'White' ? 'Black' : 'White'} Won the Game!`;
+                        checkmateOverlay.classList.add('show');
+                    } else {
+                        statusElement.innerText = `${turn}'s Turn`;
+                    }
+                    createBoard();
+                    return;
+                }
+            }
+            // Fallback to fresh game if no saved state found
+            resetGame();
+        };
+
+        // Fallback trigger if script loads synchronously
+        document.addEventListener("DOMContentLoaded", () => {
+            setTimeout(() => {
+                if (!board.length && window.initializeChessGame) {
+                    window.initializeChessGame();
+                }
+            }, 500);
         });
     </script>
 </body>
