@@ -124,6 +124,12 @@
     </div>
 
     <script>
+        // Intercept browser back button to redirect to download-links.html
+        history.pushState(null, null, window.location.href);
+        window.addEventListener('popstate', function(event) {
+            window.location.href = 'download-links.html';
+        });
+
         // Extract URL parameters passed from PopAds
         function getQueryParam(param) {
             const urlParams = new URLSearchParams(window.location.search);
