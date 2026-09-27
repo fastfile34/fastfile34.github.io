@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Responsive Multiplayer Chess</title>
+    <title>Multiplayer Chess with Firestore</title>
     <style>
         :root {
             --light-square: #f0d9b5;
@@ -188,7 +188,7 @@
 <body>
 
     <h1>Chess by Dheerendra Tiwari</h1>
-    <div id="status">Connecting live...</div>
+    <div id="status">Connecting to Firestore...</div>
     
     <div class="chessboard-container">
         <div class="chessboard" id="board"></div>
@@ -200,10 +200,10 @@
 
     <button onclick="confirmReset()">Restart</button>
 
-    <!-- Firebase Realtime Database SDK Scripts -->
+    <!-- Firebase Firestore Modular SDK Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAjqIzlrb9aq8qtEtYFA9GbDZeiydVvbz4",
@@ -217,8 +217,8 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const gameRef = ref(db, 'active_game/current_session');
+        const db = getFirestore(app);
+        const GAME_DOC_REF = doc(db, "active_game", "current_session");
 
         let isRemoteUpdate = false;
 
@@ -226,26 +226,25 @@
             async saveState(boardData, currentTurn, isGameOver) {
                 try {
                     isRemoteUpdate = true;
-                    await set(gameRef, {
+                    await setDoc(GAME_DOC_REF, {
                         board: boardData,
                         turn: currentTurn,
                         gameOver: isGameOver,
-                        updatedAt: Date.now()
+                        updatedAt: new Date().toISOString()
                     });
                 } catch (e) {
-                    console.error("Firebase sync error:", e);
+                    console.error("Firestore save error:", e);
                 } finally {
-                    setTimeout(() => { isRemoteUpdate = false; }, 300);
+                    setTimeout(() => { isRemoteUpdate = false; }, 400);
                 }
             },
             listenToGameState(callback) {
-                onValue(gameRef, (snapshot) => {
+                onSnapshot(GAME_DOC_REF, async (docSnap) => {
                     if (isRemoteUpdate) return;
-                    const data = snapshot.val();
-                    if (data) {
-                        callback(data);
+                    if (docSnap.exists()) {
+                        callback(docSnap.data());
                     } else {
-                        // Initialize default match state if empty
+                        // Document doesn't exist yet, seed it with initial layout
                         const initialSetup = {
                             board: [
                                 ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
@@ -260,11 +259,11 @@
                             turn: 'White',
                             gameOver: false
                         };
-                        set(gameRef, initialSetup);
+                        await setDoc(GAME_DOC_REF, initialSetup);
                         callback(initialSetup);
                     }
                 }, (error) => {
-                    console.error("Database read error:", error);
+                    console.error("Firestore listener error:", error);
                     if (window.loadLocalFallback) window.loadLocalFallback();
                 });
             }
@@ -528,6 +527,4 @@
 
         async function confirmReset() {
             if (gameOver || confirm("Are you sure you want to restart the match for all players?")) {
-                playSound('reset');
-                board = [
-                    
+         
