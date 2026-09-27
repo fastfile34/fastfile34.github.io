@@ -188,7 +188,7 @@
 <body>
 
     <h1>Chess by Dheerendra Tiwari</h1>
-    <div id="status">Connecting to live match...</div>
+    <div id="status">Connecting live...</div>
     
     <div class="chessboard-container">
         <div class="chessboard" id="board"></div>
@@ -200,10 +200,10 @@
 
     <button onclick="confirmReset()">Restart</button>
 
-    <!-- Firebase SDK Modular Import Scripts -->
+    <!-- Firebase Realtime Database SDK Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAjqIzlrb9aq8qtEtYFA9GbDZeiydVvbz4",
@@ -217,8 +217,8 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const GAME_DOC_REF = doc(db, "active_game", "current_session");
+        const db = getDatabase(app);
+        const gameRef = ref(db, 'active_game/current_session');
 
         let isRemoteUpdate = false;
 
@@ -226,25 +226,26 @@
             async saveState(boardData, currentTurn, isGameOver) {
                 try {
                     isRemoteUpdate = true;
-                    await setDoc(GAME_DOC_REF, {
+                    await set(gameRef, {
                         board: boardData,
                         turn: currentTurn,
                         gameOver: isGameOver,
-                        updatedAt: new Date().toISOString()
+                        updatedAt: Date.now()
                     });
                 } catch (e) {
-                    console.error("Error updating state:", e);
+                    console.error("Firebase sync error:", e);
                 } finally {
-                    setTimeout(() => { isRemoteUpdate = false; }, 400);
+                    setTimeout(() => { isRemoteUpdate = false; }, 300);
                 }
             },
             listenToGameState(callback) {
-                onSnapshot(GAME_DOC_REF, async (docSnap) => {
+                onValue(gameRef, (snapshot) => {
                     if (isRemoteUpdate) return;
-                    if (docSnap.exists()) {
-                        callback(docSnap.data());
+                    const data = snapshot.val();
+                    if (data) {
+                        callback(data);
                     } else {
-                        // Document doesn't exist yet, initialize it with default layout
+                        // Initialize default match state if empty
                         const initialSetup = {
                             board: [
                                 ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
@@ -257,15 +258,13 @@
                                 ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
                             ],
                             turn: 'White',
-                            gameOver: false,
-                            updatedAt: new Date().toISOString()
+                            gameOver: false
                         };
-                        await setDoc(GAME_DOC_REF, initialSetup);
+                        set(gameRef, initialSetup);
                         callback(initialSetup);
                     }
                 }, (error) => {
-                    console.error("Firestore snapshot error:", error);
-                    // Fallback to offline rendering if rules or network block connection
+                    console.error("Database read error:", error);
                     if (window.loadLocalFallback) window.loadLocalFallback();
                 });
             }
@@ -525,4 +524,10 @@
 
         function clearHighlights() {
             document.querySelectorAll('.square').forEach(s => s.classList.remove('selected', 'movable', 'movable-capture'));
-       
+        }
+
+        async function confirmReset() {
+            if (gameOver || confirm("Are you sure you want to restart the match for all players?")) {
+                playSound('reset');
+                board = [
+                    
